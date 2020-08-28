@@ -19,10 +19,8 @@
 MsSQL to GCS operator.
 """
 
-import decimal
-
 from airflow.providers.google.cloud.transfers.sql_to_gcs import BaseSQLToGCSOperator
-from airflow.providers.microsoft.mssql.hooks.mssql import MsSqlHook
+from airflow.providers.odbc.hooks.odbc import OdbcHook
 from airflow.utils.decorators import apply_defaults
 
 
@@ -52,8 +50,6 @@ class MSSQLToGCSOperator(BaseSQLToGCSOperator):
 
     ui_color = '#e0a98c'
 
-    type_map = {3: 'INTEGER', 4: 'TIMESTAMP', 5: 'NUMERIC'}
-
     @apply_defaults
     def __init__(self, *, mssql_conn_id='mssql_default', **kwargs):
         super().__init__(**kwargs)
@@ -65,25 +61,27 @@ class MSSQLToGCSOperator(BaseSQLToGCSOperator):
 
         :return: mssql cursor
         """
-        mssql = MsSqlHook(mssql_conn_id=self.mssql_conn_id)
-        conn = mssql.get_conn()
+        mssql = OdbcHook(mssql_conn_id=self.mssql_conn_id)
+        engine = mssql.get_conn()
+        conn = engine.raw_connection()
         cursor = conn.cursor()
         cursor.execute(self.sql)
-        return cursor
 
     def field_to_bigquery(self, field):
         return {
             'name': field[0].replace(" ", "_"),
             'type': self.type_map.get(field[1], "STRING"),
-            'mode': "NULLABLE",
+            'mode': 'NULLABLE' if field[6] else 'REQUIRED',
         }
 
     @classmethod
-    def convert_type(cls, value, schema_type):
+    def type_map(cls, mssql_type):
         """
-        Takes a value from MSSQL, and converts it to a value that's safe for
-        JSON/Google Cloud Storage/BigQuery.
+        Helper function that maps from MSSQL fields to BigQuery fields.
         """
-        if isinstance(value, decimal.Decimal):
-            return float(value)
+        return mssql_type.__name__
+
+    @classmethod
+    def convert_type(self, value, schema_type):
+        """Convert a value from DBAPI to output-friendly formats."""
         return value

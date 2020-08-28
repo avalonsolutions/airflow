@@ -34,8 +34,8 @@ GZIP = False
 
 ROWS = [('mock_row_content_1', 42), ('mock_row_content_2', 43), ('mock_row_content_3', 44)]
 CURSOR_DESCRIPTION = (
-    ('some_str', 0, None, None, None, None, None),
-    ('some_num', 3, None, None, None, None, None),
+    ('some_str', str, None, None, None, None, True),
+    ('some_num', int, None, None, None, None, True),
 )
 NDJSON_LINES = [
     b'{"some_num": 42, "some_str": "mock_row_content_1"}\n',
@@ -59,7 +59,7 @@ class TestMsSqlToGoogleCloudStorageOperator(unittest.TestCase):
         self.assertEqual(op.bucket, BUCKET)
         self.assertEqual(op.filename, JSON_FILENAME)
 
-    @mock.patch('airflow.providers.google.cloud.transfers.mssql_to_gcs.MsSqlHook')
+    @mock.patch('airflow.providers.google.cloud.transfers.mssql_to_gcs.OdbcHook')
     @mock.patch('airflow.providers.google.cloud.transfers.sql_to_gcs.GCSHook')
     def test_exec_success_json(self, gcs_hook_mock_class, mssql_hook_mock_class):
         """Test successful run of execute function for JSON"""
@@ -88,7 +88,7 @@ class TestMsSqlToGoogleCloudStorageOperator(unittest.TestCase):
         mssql_hook_mock_class.assert_called_once_with(mssql_conn_id=MSSQL_CONN_ID)
         mssql_hook_mock.get_conn().cursor().execute.assert_called_once_with(SQL)
 
-    @mock.patch('airflow.providers.google.cloud.transfers.mssql_to_gcs.MsSqlHook')
+    @mock.patch('airflow.providers.google.cloud.transfers.mssql_to_gcs.OdbcHook')
     @mock.patch('airflow.providers.google.cloud.transfers.sql_to_gcs.GCSHook')
     def test_file_splitting(self, gcs_hook_mock_class, mssql_hook_mock_class):
         """Test that ndjson is split by approx_max_file_size_bytes param."""
@@ -120,7 +120,7 @@ class TestMsSqlToGoogleCloudStorageOperator(unittest.TestCase):
         )
         op.execute(None)
 
-    @mock.patch('airflow.providers.google.cloud.transfers.mssql_to_gcs.MsSqlHook')
+    @mock.patch('airflow.providers.google.cloud.transfers.mssql_to_gcs.OdbcHook')
     @mock.patch('airflow.providers.google.cloud.transfers.sql_to_gcs.GCSHook')
     def test_schema_file(self, gcs_hook_mock_class, mssql_hook_mock_class):
         """Test writing schema files."""

@@ -22,6 +22,7 @@ Base operator for SQL to GCS operators.
 import abc
 import json
 import warnings
+import tempfile
 from tempfile import NamedTemporaryFile
 from typing import Optional, Sequence, Union
 
@@ -111,6 +112,7 @@ class BaseSQLToGCSOperator(BaseOperator):
         field_delimiter=',',
         gzip=False,
         schema=None,
+        mount_disk=None,
         parameters=None,
         gcp_conn_id='google_cloud_default',
         google_cloud_storage_conn_id=None,
@@ -138,6 +140,7 @@ class BaseSQLToGCSOperator(BaseOperator):
         self.field_delimiter = field_delimiter
         self.gzip = gzip
         self.schema = schema
+        self.mount_disk = mount_disk
         self.parameters = parameters
         self.gcp_conn_id = gcp_conn_id
         self.delegate_to = delegate_to
@@ -178,6 +181,12 @@ class BaseSQLToGCSOperator(BaseOperator):
             names in GCS, and values are file handles to local files that
             contain the data for the GCS objects.
         """
+
+        self.log.info("Current temp directory: {}".format(tempfile.gettempdir()))
+        if self.mount_disk:
+            tempfile.tempdir = self.mount_disk
+            self.log.info("Changed temp directory to: {}".format(tempfile.gettempdir()))
+
         schema = list(map(lambda schema_tuple: schema_tuple[0], cursor.description))
         col_type_dict = self._get_col_type_dict()
         file_no = 0
