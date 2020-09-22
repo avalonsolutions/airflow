@@ -85,7 +85,9 @@ with models.DAG(
 
     # [START howto_operator_dlp_delete_inspect_template]
     delete_template = CloudDLPDeleteInspectTemplateOperator(
-        task_id="delete_template", template_id=TEMPLATE_ID, project_id=GCP_PROJECT,
+        task_id="delete_template",
+        template_id=TEMPLATE_ID,
+        project_id=GCP_PROJECT,
     )
     # [END howto_operator_dlp_delete_inspect_template]
 
@@ -129,7 +131,9 @@ with models.DAG(
     # [END howto_operator_dlp_update_info_type]
     # [START howto_operator_dlp_delete_info_type]
     delete_info_type = CloudDLPDeleteStoredInfoTypeOperator(
-        project_id=GCP_PROJECT, stored_info_type_id=CUSTOM_INFO_TYPE_ID, task_id="delete_info_type",
+        project_id=GCP_PROJECT,
+        stored_info_type_id=CUSTOM_INFO_TYPE_ID,
+        task_id="delete_info_type",
     )
     # [END howto_operator_dlp_delete_info_type]
     create_info_type >> update_info_type >> delete_info_type
@@ -173,4 +177,3 @@ with models.DAG(
     )
     # [END howto_operator_dlp_delete_job_trigger]
     create_trigger >> update_trigger >> delete_trigger
-

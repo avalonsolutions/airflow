@@ -39,6 +39,7 @@ EXISTING_ROLES = {
 
 class AirflowSecurityManager(SecurityManager, LoggingMixin):
     """Custom security manager, which introduces an permission model adapted to Airflow"""
+
     ###########################################################################
     #                               VIEW MENUS
     ###########################################################################
@@ -59,7 +60,7 @@ class AirflowSecurityManager(SecurityManager, LoggingMixin):
         'LogModelView',
         'Docs',
         'Documentation',
-        'Github',
+        'GitHub',
         'About',
         'Version',
         'VersionView',
@@ -113,6 +114,7 @@ class AirflowSecurityManager(SecurityManager, LoggingMixin):
         'can_blocked',
         'can_rendered',
         'can_version',
+        'can_extra_links'
     }
     # [END security_viewer_perms]
 
