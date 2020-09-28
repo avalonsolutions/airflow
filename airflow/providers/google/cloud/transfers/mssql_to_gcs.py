@@ -79,7 +79,39 @@ class MSSQLToGCSOperator(BaseSQLToGCSOperator):
         """
         Helper function that maps from MSSQL fields to BigQuery fields.
         """
-        return mssql_type.__name__
+        value = mssql_type.__name__
+        schema_dict = {
+            'int': 'INTEGER',
+            'tinyint': 'INTEGER',
+            'smallint': 'INTEGER',
+            'bigint': 'INTEGER',
+            'bit': 'BOOLEAN',
+            'bool': 'BOOLEAN',
+            'char': 'STRING',
+            'varchar': 'STRING',
+            'text': 'STRING',
+            'nchar': 'STRING',
+            'nvarchar': 'STRING',
+            'ntext': 'STRING',
+            'uuid': 'STRING',
+            'str': 'STRING',
+            'money': 'NUMERIC',
+            'numeric': 'NUMERIC',
+            'smallmoney': 'NUMERIC',
+            'decimal': 'NUMERIC',
+            'datetime': 'DATETIME',
+            'datetime2': 'DATETIME',
+            'smalldatetime': 'DATETIME',
+            'date': 'DATE',
+            'time': 'TIME',
+            'float': 'FLOAT',
+            'real': 'FLOAT',
+            'double': 'FLOAT'
+        }
+        if value.lower() in schema_dict:
+            return schema_dict[value.lower()]
+        else:
+            return 'STRING'
 
     @classmethod
     def convert_type(self, value, schema_type):
